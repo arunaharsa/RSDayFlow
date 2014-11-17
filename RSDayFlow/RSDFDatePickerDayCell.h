@@ -35,6 +35,8 @@
 /// @name Accessing Subviews
 ///-------------------------
 
+- (void)updateSubviews;
+
 /**
  The label showing the cell's date.
  */
@@ -65,6 +67,12 @@
  A Boolean value that determines whether the cell represents the current day.
  */
 @property (nonatomic, getter = isToday) BOOL today;
+
+
+/**
+ A Boolean value that determines whether the cell represents the earlier than today.
+ */
+@property (nonatomic, getter = isEarlierThanToday) BOOL earlierThanToday;
 
 /**
  A Boolean value that determines whether the cell have a mark.

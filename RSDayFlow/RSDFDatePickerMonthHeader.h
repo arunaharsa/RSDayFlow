@@ -90,4 +90,6 @@
  */
 - (UIColor *)currentMonthLabelTextColor;
 
+
+- (void)updateSubviews;
 @end

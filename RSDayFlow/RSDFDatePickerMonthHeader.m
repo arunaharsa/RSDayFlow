@@ -78,12 +78,17 @@
 - (void)setCurrentMonth:(BOOL)currentMonth
 {
     _currentMonth = currentMonth;
+    [self updateSubviews];
+}
+
+- (void)updateSubviews{
     if (!_currentMonth) {
         self.dateLabel.textColor = [self monthLabelTextColor];
     } else {
         self.dateLabel.textColor = [self currentMonthLabelTextColor];
     }
 }
+
 
 #pragma mark - Attributes of the View
 

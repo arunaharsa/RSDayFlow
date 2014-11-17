@@ -28,10 +28,14 @@
 @protocol RSDFDatePickerViewDelegate;
 @protocol RSDFDatePickerViewDataSource;
 
+@class RSDFDatePickerCollectionView;
 /**
  The `RSDFDatePickerView` is a calendar view with infinity scrolling.
 */
 @interface RSDFDatePickerView : UIView
+
+
+@property (nonatomic, readonly, strong) RSDFDatePickerCollectionView *collectionView;
 
 /**
  Designated initializer. Initializes and returns a newly allocated view object with the specified frame rectangle and the specified calendar.
@@ -233,4 +237,18 @@
  */
 - (BOOL)datePickerView:(RSDFDatePickerView *)view isCompletedAllTasksOnDate:(NSDate *)date;
 
+/**
+ Asks the data source if the date should be marked as dayoff.
+ Defaulted to sat,sun if not responded
+ 
+ @param view The date picker view object that is asking whether the date should mark.
+ 
+ @return YES if the date should be marked or NO if it should not.
+ 
+ */
+- (BOOL)datePickerView:(RSDFDatePickerView *)view shouldDayOffDate:(NSDate *)date;
+
+
 @end
+
+
