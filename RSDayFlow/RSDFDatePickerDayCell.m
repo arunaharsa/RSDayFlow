@@ -34,6 +34,7 @@
 @property (nonatomic, readonly, strong) UIImageView *overlayImageView;
 @property (nonatomic, readonly, strong) UIImageView *markImageView;
 @property (nonatomic, readonly, strong) UIImageView *dividerImageView;
+@property (nonatomic, readonly, strong) UIView *leftDividerView;
 
 @end
 
@@ -44,6 +45,7 @@
 @synthesize overlayImageView = _overlayImageView;
 @synthesize markImageView = _markImageView;
 @synthesize dividerImageView = _dividerImageView;
+@synthesize leftDividerView = _leftDividerView;
 
 #pragma mark - Lifecycle
 
@@ -74,6 +76,8 @@
     [self addSubview:self.markImageView];
     [self addSubview:self.dividerImageView];
     [self addSubview:self.dateLabel];
+    [self addSubview:self.leftDividerView];
+    [self addSubview:self.monthLabel];
     
     [self updateSubviews];
 }
@@ -82,12 +86,13 @@
 {
     [super layoutSubviews];
     
-    self.dateLabel.frame = [self selectedImageViewFrame];
+    self.dateLabel.frame = [self dateLabelFrame];
     self.selectedDayImageView.frame = [self selectedImageViewFrame];
     self.overlayImageView.frame = [self selectedImageViewFrame];
     self.markImageView.frame = [self markImageViewFrame];
     self.dividerImageView.frame = [self dividerImageViewFrame];
     self.dividerImageView.image = [self dividerImage];
+    self.monthLabel.frame = [self monthLabelFrame];
 }
 
 - (void)drawRect:(CGRect)rect
@@ -97,9 +102,22 @@
 
 #pragma mark - Custom Accessors
 
+#define kMarginLabel 5.0f
+- (CGRect)dateLabelFrame
+{
+    return CGRectMake(kMarginLabel, kMarginLabel, self.frame.size.width-kMarginLabel, 25.0f);
+}
+
+- (CGRect)monthLabelFrame
+{
+    return CGRectMake(kMarginLabel, kMarginLabel, self.frame.size.width-kMarginLabel, 25.0f);
+}
+
+
+
 - (CGRect)selectedImageViewFrame
 {
-    return CGRectMake(CGRectGetWidth(self.frame) / 2 - 17.5f, 5.5f, 35.0f, 35.0f);
+    return CGRectMake(0, 0, self.frame.size.width, self.frame.size.height);
 }
 
 - (UIImageView *)selectedDayImageView
@@ -116,12 +134,24 @@
 - (UILabel *)dateLabel
 {
     if (!_dateLabel) {
-        _dateLabel = [[UILabel alloc] initWithFrame:[self selectedImageViewFrame]];
+        _dateLabel = [[UILabel alloc] initWithFrame:[self dateLabelFrame]];
         _dateLabel.backgroundColor = [UIColor clearColor];
-        _dateLabel.textAlignment = NSTextAlignmentCenter;
+        _dateLabel.textAlignment = NSTextAlignmentLeft;
     }
     return _dateLabel;
 }
+
+
+- (UILabel *)monthLabel
+{
+    if (!_monthLabel) {
+        _monthLabel = [[UILabel alloc] initWithFrame:[self monthLabelFrame]];
+        _monthLabel.backgroundColor = [UIColor clearColor];
+        _monthLabel.textAlignment = NSTextAlignmentLeft;
+    }
+    return _monthLabel;
+}
+
 
 - (UIImageView *)overlayImageView
 {
@@ -167,6 +197,17 @@
     return _dividerImageView;
 }
 
+
+- (UIView *)leftDividerView
+{
+    if (!_leftDividerView) {
+        UIView *leftLine = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 0.5, self.frame.size.height)];
+        leftLine.backgroundColor = [self dividerImageColor];
+        _leftDividerView = leftLine;
+    }
+    return _leftDividerView;
+}
+
 #pragma mark - Private
 
 - (void)updateSubviews
@@ -174,7 +215,9 @@
     self.selectedDayImageView.hidden = !self.isSelected || self.isNotThisMonth;
     self.overlayImageView.hidden = !self.isHighlighted || self.isNotThisMonth;
     self.markImageView.hidden = !self.isMarked || self.isNotThisMonth;
-    self.dividerImageView.hidden = self.isNotThisMonth;
+//    self.dividerImageView.hidden = self.isNotThisMonth;
+    self.dividerImageView.hidden = NO;
+    self.leftDividerView.hidden = self.dividerImageView.hidden;
     
     if (self.isNotThisMonth) {
         self.dateLabel.textColor = [self notThisMonthLabelTextColor];
@@ -210,6 +253,9 @@
             self.markImageView.image = [self completeMarkImage];
         }
     }
+    
+    self.monthLabel.textColor = [self monthLabelTextColor];
+    self.monthLabel.font = [self monthLabelFont];
 }
 
 + (NSCache *)imageCache
@@ -283,10 +329,25 @@
     return [UIFont fontWithName:@"HelveticaNeue" size:18.0f];
 }
 
+
+- (UIFont *)monthLabelFont
+{
+    return [UIFont fontWithName:@"HelveticaNeue" size:18.0f];
+}
+
+
 - (UIColor *)dayLabelTextColor
 {
     return [UIColor blackColor];
 }
+
+
+
+- (UIColor *)monthLabelTextColor
+{
+    return [UIColor colorWithRed:252/255.0f green:71/255.0f blue:71/255.0f alpha:1.0f];
+}
+
 
 - (UIColor *)dayOffLabelTextColor
 {
@@ -365,7 +426,7 @@
     if (!selectedDayImage) {
         UIColor *selectedDayImageColor = [self selectedDayImageColor];
         NSString *selectedDayImageKey = [NSString stringWithFormat:@"img_selected_day_%@", [selectedDayImageColor description]];
-        selectedDayImage = [self ellipseImageWithKey:selectedDayImageKey frame:self.selectedDayImageView.frame color:selectedDayImageColor];
+        selectedDayImage = [self rectImageWithKey:selectedDayImageKey frame:self.selectedDayImageView.frame color:selectedDayImageColor];
     }
     return selectedDayImage;
 }
@@ -386,7 +447,7 @@
     if (!overlayImage) {
         UIColor *overlayImageColor = [self overlayImageColor];
         NSString *overlayImageKey = [NSString stringWithFormat:@"img_overlay_%@", [overlayImageColor description]];
-        overlayImage = [self ellipseImageWithKey:overlayImageKey frame:self.overlayImageView.frame color:overlayImageColor];
+        overlayImage = [self rectImageWithKey:overlayImageKey frame:self.overlayImageView.frame color:overlayImageColor];
     }
     return overlayImage;
 }

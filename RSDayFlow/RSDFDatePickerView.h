@@ -104,6 +104,9 @@
 
 - (void)selectDate:(NSDate *)date;
 
+
+- (NSIndexPath *)indexPathForDate:(NSDate *)date;
+
 ///-------------------------
 /// @name Reloading the Data
 ///-------------------------

@@ -82,7 +82,7 @@
 
 - (CGFloat)selfMinimumInteritemSpacing
 {
-    return 2.0f;
+    return 0.0f;
 }
 
 @end

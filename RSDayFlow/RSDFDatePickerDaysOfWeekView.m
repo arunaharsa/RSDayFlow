@@ -33,6 +33,7 @@
 @property (strong, nonatomic) NSArray *veryShortStandaloneWeekdaySymbols;
 @property (strong, nonatomic) NSArray *shortStandaloneWeekdaySymbols;
 @property (strong, nonatomic) NSArray *standaloneWeekdaySymbols;
+@property (nonatomic, strong) UIView *dividerView;
 
 @end
 
@@ -175,6 +176,23 @@
     }];
     
     self.weekdayLabels = [weekdayLabels copy];
+    
+//    [self addSubview:self.dividerView];
+}
+
+
+- (UIView *)dividerView
+{
+    if (!_dividerView) {
+        UIView *leftLine = [[UIView alloc] initWithFrame:CGRectMake(0, self.frame.size.height, self.frame.size.width, 0.5)];
+        leftLine.backgroundColor = [self dividerImageColor];
+        _dividerView = leftLine;
+    }
+    return _dividerView;
+}
+
+- (UIColor *)dividerImageColor{
+    return [UIColor colorWithRed:200/255.0f green:200/255.0f blue:200/255.0f alpha:1.0f];
 }
 
 - (NSArray *)reorderedWeekdaySymbols:(NSArray *)weekdaySymbols firstWeekdayIndex:(NSUInteger)firstWeekdayIndex
@@ -190,6 +208,9 @@
     
     CGFloat y = 0;
     __block CGFloat x = 0;
+    
+    CGFloat leftPadding = 0;
+    x+= leftPadding;
     
     [self.weekdayLabels enumerateObjectsUsingBlock:^(UILabel *weekdayLabel, NSUInteger idx, BOOL *stop) {
         CGRect weekdayLabelFrame = CGRectMake(x, y, itemSize.width, itemSize.height);

@@ -135,7 +135,7 @@ static NSString * const RSDFDatePickerViewDayCellIdentifier = @"RSDFDatePickerVi
     CGRect namesOfDaysViewFrame = self.bounds;
     if (isPhone) {
         if (isPortraitInterfaceOrientation) {
-            namesOfDaysViewFrame.size.height = 22.0f;
+            namesOfDaysViewFrame.size.height = 40.0f;
         } else {
             namesOfDaysViewFrame.size.height = 26.0f;
         }
@@ -286,6 +286,8 @@ static NSString * const RSDFDatePickerViewDayCellIdentifier = @"RSDFDatePickerVi
 
 - (void)selectDate:(NSDate *)date
 {
+    
+    
     if (![self.selectedDate isEqual:date]) {
         if (self.selectedDate &&
             [self.selectedDate compare:[self dateFromPickerDate:self.fromDate]] != NSOrderedAscending &&
@@ -552,6 +554,12 @@ static NSString * const RSDFDatePickerViewDayCellIdentifier = @"RSDFDatePickerVi
     NSDate *firstDayInMonth = [self dateForFirstDayInSection:monthSection];
     NSUInteger weekday = [self reorderedWeekday:[self.calendar components:NSCalendarUnitWeekday fromDate:firstDayInMonth].weekday];
     NSInteger dateItem = [self.calendar components:NSCalendarUnitDay fromDate:firstDayInMonth toDate:date options:0].day + weekday;
+    
+    // Add 1 more row for separator, if the week start from sunday
+    if ([[self.calendar components:NSCalendarUnitWeekday fromDate:firstDayInMonth] weekday] == 1){
+        dateItem += self.daysInWeek;
+    }
+    
     NSIndexPath *indexPath = [NSIndexPath indexPathForItem:dateItem inSection:monthSection];
     
     return indexPath;
@@ -602,7 +610,15 @@ static NSString * const RSDFDatePickerViewDayCellIdentifier = @"RSDFDatePickerVi
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-    return self.daysInWeek * [self numberOfWeeksForMonthOfDate:[self dateForFirstDayInSection:section]];
+    NSInteger numberOfItems = self.daysInWeek * [self numberOfWeeksForMonthOfDate:[self dateForFirstDayInSection:section]];
+    
+    // Add 1 more row for separator, if the week start from sunday
+    NSDate *firstDayInMonth = [self dateForFirstDayInSection:section];
+    if ([[self.calendar components:NSCalendarUnitWeekday fromDate:firstDayInMonth] weekday] == 1){
+        numberOfItems += self.daysInWeek;
+    }
+
+    return numberOfItems;
 }
 
 - (RSDFDatePickerDayCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
@@ -616,14 +632,41 @@ static NSString * const RSDFDatePickerViewDayCellIdentifier = @"RSDFDatePickerVi
     NSDate *cellDate = [self.calendar dateByAddingComponents:((^{
         NSDateComponents *dateComponents = [NSDateComponents new];
         dateComponents.day = indexPath.item - weekday;
+        
+        // Add 1 more row for separator, if the week start from sunday
+        if ([[self.calendar components:NSCalendarUnitWeekday fromDate:firstDayInMonth] weekday] == 1){
+            dateComponents.day -= self.daysInWeek;
+        }
+        
         return dateComponents;
     })()) toDate:firstDayInMonth options:0];
     RSDFDatePickerDate cellPickerDate = [self pickerDateFromDate:cellDate];
-    
+
+
     cell.date = cellPickerDate;
     cell.dateLabel.text = [NSString stringWithFormat:@"%lu", (unsigned long)(cellPickerDate.day)];
     
-    cell.notThisMonth = !((firstDayPickerDate.year == cellPickerDate.year) && (firstDayPickerDate.month == cellPickerDate.month));
+    BOOL notThisMonth = !((firstDayPickerDate.year == cellPickerDate.year) && (firstDayPickerDate.month == cellPickerDate.month));
+    
+    if ([[self.calendar components:NSCalendarUnitWeekday fromDate:cellDate] weekday]==1 && notThisMonth){
+        cell.firstDayOfMonthView = YES;
+        
+        NSString *dateFormatterName = [NSString stringWithFormat:@"calendarMonthHeader_%@_%@", [self.calendar calendarIdentifier], [[self.calendar locale] localeIdentifier]];
+        NSDateFormatter *dateFormatter = [self.calendar df_dateFormatterNamed:dateFormatterName withConstructor:^{
+            NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+            [dateFormatter setCalendar:self.calendar];
+            [dateFormatter setLocale:[self.calendar locale]];
+            return dateFormatter;
+        }];
+        NSString *monthString = [dateFormatter shortStandaloneMonthSymbols][cellPickerDate.month%12];
+        cell.monthLabel.text = [monthString uppercaseString];
+        cell.monthLabel.hidden = NO;
+    } else{
+        cell.firstDayOfMonthView = NO;
+        cell.monthLabel.hidden = YES;
+    }
+    
+    cell.notThisMonth = notThisMonth;
     if (!cell.isNotThisMonth) {
         weekday = [self.calendar components:NSCalendarUnitWeekday fromDate:cellDate].weekday;
 
@@ -741,6 +784,7 @@ static NSString * const RSDFDatePickerViewDayCellIdentifier = @"RSDFDatePickerVi
 {
     RSDFDatePickerDayCell *cell = ((RSDFDatePickerDayCell *)[collectionView cellForItemAtIndexPath:indexPath]);
     NSDate *date = cell ? [self dateFromPickerDate:cell.date] : nil;
+    
     
     [self selectDate:date];
     

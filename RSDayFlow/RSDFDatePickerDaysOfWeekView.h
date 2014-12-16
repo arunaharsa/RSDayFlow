@@ -95,4 +95,7 @@
  */
 - (UIColor *)dayOffOfWeekLabelTextColor;
 
+
+- (UIColor *)dividerImageColor;
+
 @end

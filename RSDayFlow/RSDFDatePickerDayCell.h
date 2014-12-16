@@ -41,6 +41,7 @@
  The label showing the cell's date.
  */
 @property (nonatomic, readonly, strong) UILabel *dateLabel;
+@property (nonatomic, strong) UILabel *monthLabel;
 
 ///--------------------------------------
 /// @name Accessing Attributes of the Day
@@ -57,6 +58,12 @@
  @discussion Cells with these days do not display the today image, the overlay image, the marks and the divider image.
 */
 @property (nonatomic, getter = isNotThisMonth) BOOL notThisMonth;
+
+/**
+ A Boolean value that determines whether it is the first cell in the month view, although the date is not necessarily belongs to that month
+ 
+ */
+@property (nonatomic, getter = isFirstDayOfMonthView) BOOL firstDayOfMonthView;
 
 /**
  A Boolean value that determines whether the cell's day is day off.
@@ -252,5 +259,9 @@
  @discussion Can be overridden in subclasses for customization.
  */
 - (UIImage *)customDividerImage;
+
+// additional modifiers
+- (UIFont *)monthLabelFont;
+- (UIColor *)monthLabelTextColor;
 
 @end

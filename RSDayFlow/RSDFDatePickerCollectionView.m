@@ -80,7 +80,7 @@
 
 - (UIColor *)selfBackgroundColor
 {
-    return [UIColor whiteColor];
+    return [UIColor clearColor];
 }
 
 @end
